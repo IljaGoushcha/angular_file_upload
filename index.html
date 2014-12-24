@@ -9,9 +9,17 @@
     <link href="css/styles.css" rel="stylesheet">
   </head>
 
-  <body ng-app="HttpPost" ng-controller="MainCtrl">
+  <body ng-app="uploadModule" ng-controller="uploadCtrl">
 
+    <input type="file" file-model="myFile"/>
 
+    {{myFile}}
+
+    <div ng-controller="uploadCtrl">
+      <button ng-click="play()" class="button" ng-show="!playing">Play</button>
+      <button ng-click="stop()" class="button alert" ng-show="playing">Stop</button>
+      Playing audio: <b>{{ playing }}</b>
+    </div>
 
     <script src="bower_components/angular/angular.js"></script>
     <script src="bower_components/jquery/dist/jquery.js"></script>
