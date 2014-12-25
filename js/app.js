@@ -6,6 +6,7 @@ angular.module('uploadModule').controller('uploadCtrl', function($scope, $http) 
     var uploadUrl = "http://emphonic-player-demo.s3.amazonaws.com/";
     $scope.audio = document.createElement('audio');
     $scope.audio.src = 'Xtreme - Te Extraño (Bachata Version).mp3';
+    var signKeyResponse = null;
 
     $scope.play = function() {
         $scope.audio.play();
@@ -21,7 +22,9 @@ angular.module('uploadModule').controller('uploadCtrl', function($scope, $http) 
         console.log("inside getAmazonURL");
         $http.get('http://localhost:3000/amazon/sign_key').success(function(response){
             $scope.response = response;
-            console.log(response.key);
+            signKeyResponse = response;
+
+            console.log(signKeyResponse);
         }).error(function(data, status, headers, config){
             console.log(data);
             console.log(status);
@@ -41,22 +44,22 @@ angular.module('uploadModule').controller('uploadCtrl', function($scope, $http) 
     };
 
     //from Cenk
-    var postImageToS3 = function(imageFile, signKeyResponse) {
+    $scope.postFileToS3 = function(myFile) {
+        console.log("hi");
+        var fileData = new FormData();
+        fileData.append('key', signKeyResponse.key);
+        fileData.append('AWSAccessKeyId', signKeyResponse.access_key);
+        fileData.append('policy', signKeyResponse.policy);
+        fileData.append('acl', signKeyResponse.acl);
+        fileData.append('signature', signKeyResponse.signature);
+        fileData.append('Content-Type', 'audio/mp3');
+        fileData.append('file', $scope.myFile);
+        console.log(signKeyResponse);
 
-        var imageData = new FormData();
-        imageData.append('key', signKeyResponse.key);
-        imageData.append('AWSAccessKeyId', signKeyResponse.access_key);
-        imageData.append('policy', signKeyResponse.policy);
-        imageData.append('acl', 'public-read');
-        imageData.append('signature', signKeyResponse.signature);
-        imageData.append('Content-Type', 'image/jpeg');
-        imageData.append('file', imageFile);
-
-        $http.post(AmazonS3, imageData, {
+        $http.post(uploadUrl, fileData, {
         transformRequest: angular.identity,
             headers: {
             'Content-Type': undefined,
-            'Authorization': ''
             }
         }).success(function(response) {
           console.log('eureka!');
@@ -70,6 +73,7 @@ angular.module('uploadModule').controller('uploadCtrl', function($scope, $http) 
 
 angular.module('uploadModule').service('fileUpload', ['$http', function ($http) {
     this.uploadFileToUrl = function(file, uploadUrl){
+        insideFileToUrl
         var fd = new FormData();
         fd.append('file', file);
         $http.post(uploadUrl, fd, {

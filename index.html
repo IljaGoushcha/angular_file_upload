@@ -13,7 +13,8 @@
 
     <input type="file" file-model="myFile" ng-click="getAmazonURL()"/>
 
-    {{myFile.name}}
+    {{myFile}}
+    <button class="btn btn-success" ng-click="postFileToS3()">Upload to S3</button>
 
     <div ng-controller="uploadCtrl">
       <button ng-click="play()" class="button" ng-show="!playing">Play</button>
