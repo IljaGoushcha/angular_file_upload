@@ -38,7 +38,33 @@ angular.module('uploadModule').controller('uploadCtrl', function($scope, $http) 
         "Signature" : $scope.response.signature
       };
       $http.post('http://emphonic-player-demo.s3.amazonaws.com/', data);
-    }
+    };
+
+    //from Cenk
+    var postImageToS3 = function(imageFile, signKeyResponse) {
+
+        var imageData = new FormData();
+        imageData.append('key', signKeyResponse.key);
+        imageData.append('AWSAccessKeyId', signKeyResponse.access_key);
+        imageData.append('policy', signKeyResponse.policy);
+        imageData.append('acl', 'public-read');
+        imageData.append('signature', signKeyResponse.signature);
+        imageData.append('Content-Type', 'image/jpeg');
+        imageData.append('file', imageFile);
+
+        $http.post(AmazonS3, imageData, {
+        transformRequest: angular.identity,
+            headers: {
+            'Content-Type': undefined,
+            'Authorization': ''
+            }
+        }).success(function(response) {
+          console.log('eureka!');
+        }).error(function(){
+          console.log('fuck you');
+        });
+    };
+    //from Cenk
 
 });
 
@@ -57,6 +83,7 @@ angular.module('uploadModule').service('fileUpload', ['$http', function ($http) 
     }
 }]);
 
+//the directive below binds file object to a variable in $scope
 angular.module('uploadModule').directive('fileModel', ['$parse', function ($parse) {
     return {
         restrict: 'A',
