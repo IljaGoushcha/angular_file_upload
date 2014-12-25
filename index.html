@@ -11,9 +11,9 @@
 
   <body ng-app="uploadModule" ng-controller="uploadCtrl">
 
-    <input type="file" file-model="myFile"/>
+    <input type="file" file-model="myFile" ng-click="getAmazonURL()"/>
 
-    {{myFile}}
+    {{myFile.name}}
 
     <div ng-controller="uploadCtrl">
       <button ng-click="play()" class="button" ng-show="!playing">Play</button>

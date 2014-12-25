@@ -1,9 +1,9 @@
 angular.module('uploadModule', []);
 
-angular.module('uploadModule').controller('uploadCtrl', function($scope) {
+angular.module('uploadModule').controller('uploadCtrl', function($scope, $http) {
     'use strict';
 
-    var x = document.getElementById("myFile");
+    var uploadUrl = "http://emphonic-player-demo.s3.amazonaws.com/";
     $scope.audio = document.createElement('audio');
     $scope.audio.src = 'Xtreme - Te Extraño (Bachata Version).mp3';
 
@@ -17,7 +17,45 @@ angular.module('uploadModule').controller('uploadCtrl', function($scope) {
         $scope.playing = false;
     };
 
+    $scope.getAmazonURL = function() {
+        console.log("inside getAmazonURL");
+        $http.get('http://localhost:3000/amazon/sign_key').success(function(response){
+            $scope.response = response;
+            console.log(response.key);
+        }).error(function(data, status, headers, config){
+            console.log(data);
+            console.log(status);
+            console.log("error");
+        });
+    };
+
+    $scope.uploadFile = function() {
+      data = {
+        "acl" : $scope.response.acl,
+        "key" : $scope.response.key,
+        "AWSAccessKeyId" : $scope.response.access_key,
+        "Policy" : $scope.response.policy,
+        "Signature" : $scope.response.signature
+      };
+      $http.post('http://emphonic-player-demo.s3.amazonaws.com/', data);
+    }
+
 });
+
+angular.module('uploadModule').service('fileUpload', ['$http', function ($http) {
+    this.uploadFileToUrl = function(file, uploadUrl){
+        var fd = new FormData();
+        fd.append('file', file);
+        $http.post(uploadUrl, fd, {
+            transformRequest: angular.identity,
+            headers: {'Content-Type': undefined}
+        })
+        .success(function(){
+        })
+        .error(function(){
+        });
+    }
+}]);
 
 angular.module('uploadModule').directive('fileModel', ['$parse', function ($parse) {
     return {
