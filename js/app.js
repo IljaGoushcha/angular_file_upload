@@ -3,7 +3,7 @@ angular.module('uploadModule', []);
 angular.module('uploadModule').controller('uploadCtrl', function($scope, $http) {
     'use strict';
 
-    var uploadUrl = "http://emphonic-player-demo.s3.amazonaws.com/";
+    var uploadUrl = "http://emphonic-player-demo.s3.amazonaws.com/uploads";
     $scope.audio = document.createElement('audio');
     $scope.audio.src = 'Xtreme - Te Extraño (Bachata Version).mp3';
     var signKeyResponse = null;
@@ -54,12 +54,13 @@ angular.module('uploadModule').controller('uploadCtrl', function($scope, $http) 
         fileData.append('signature', signKeyResponse.signature);
         fileData.append('Content-Type', 'audio/mp3');
         fileData.append('file', $scope.myFile);
-        console.log(signKeyResponse);
+        console.log($scope.myFile);
 
         $http.post(uploadUrl, fileData, {
         transformRequest: angular.identity,
             headers: {
             'Content-Type': undefined,
+            'Access-Control-Allow-Origin': '*'
             }
         }).success(function(response) {
           console.log('eureka!');
