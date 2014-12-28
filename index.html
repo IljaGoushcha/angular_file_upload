@@ -11,7 +11,7 @@
 
   <body ng-app="uploadModule" ng-controller="uploadCtrl">
 
-    <input type="file" file-model="myFile" ng-click="getAmazonURL()"/>
+    <input type="file" fileread="myFile" ng-click="getAmazonURL()"/>
 
     {{myFile}}
     <button class="btn btn-success" ng-click="postFileToS3()">Upload to S3</button>

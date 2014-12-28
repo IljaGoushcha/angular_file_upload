@@ -3,7 +3,7 @@ angular.module('uploadModule', []);
 angular.module('uploadModule').controller('uploadCtrl', function($scope, $http) {
     'use strict';
 
-    var uploadUrl = "http://emphonic-player-demo.s3.amazonaws.com/uploads";
+    var uploadUrl = "http://emphonic-player-demo.s3.amazonaws.com/";
     $scope.audio = document.createElement('audio');
     $scope.audio.src = 'Xtreme - Te Extraño (Bachata Version).mp3';
     var signKeyResponse = null;
@@ -52,15 +52,15 @@ angular.module('uploadModule').controller('uploadCtrl', function($scope, $http) 
         fileData.append('policy', signKeyResponse.policy);
         fileData.append('acl', signKeyResponse.acl);
         fileData.append('signature', signKeyResponse.signature);
-        fileData.append('Content-Type', 'audio/mp3');
-        fileData.append('file', $scope.myFile);
+        fileData.append('Content-Type', 'audio/*');
+        fileData.append('file', myFile);
         console.log($scope.myFile);
 
         $http.post(uploadUrl, fileData, {
-        transformRequest: angular.identity,
+            transformRequest: angular.identity,
             headers: {
             'Content-Type': undefined,
-            'Access-Control-Allow-Origin': '*'
+            'Authorization': ''
             }
         }).success(function(response) {
           console.log('eureka!');
@@ -72,38 +72,82 @@ angular.module('uploadModule').controller('uploadCtrl', function($scope, $http) 
 
 });
 
-angular.module('uploadModule').service('fileUpload', ['$http', function ($http) {
-    this.uploadFileToUrl = function(file, uploadUrl){
-        insideFileToUrl
-        var fd = new FormData();
-        fd.append('file', file);
-        $http.post(uploadUrl, fd, {
-            transformRequest: angular.identity,
-            headers: {'Content-Type': undefined}
-        })
-        .success(function(){
-        })
-        .error(function(){
+// angular.module('uploadModule').service('fileUpload', ['$http', function ($http) {
+//     this.uploadFileToUrl = function(file, uploadUrl){
+//         insideFileToUrl
+//         var fd = new FormData();
+//         fd.append('file', file);
+//         $http.post(uploadUrl, fd, {
+//             transformRequest: angular.identity,
+//             headers: {'Content-Type': undefined}
+//         })
+//         .success(function(){
+//         })
+//         .error(function(){
+//         });
+//     }
+// }]);
+
+//trying new upload directive from Cenk's code:
+angular.module('uploadModule').directive('fileread', function() {
+  return {
+    scope: {
+      fileread: '='
+    },
+
+    link: function(scope, element, attrs) {
+      element.bind("change", function(e) {
+        scope.$apply(function() {
+          scope.fileread = e.target.files[0];
         });
+      });
     }
-}]);
+  };
+});
+
+//from Jason
+  var sendToAmazon = function(imageFile, postId){
+    postID = postId;
+    return fetchKey().then(function(response){
+      signKeyResults = response;
+      if(postID){
+        postRails(makePayload(postID),postId).then(function(response){
+          $http.post(AmazonBucket, buildFormData(imageFile), {
+            transformRequest: angular.identity,
+            headers: { 'Content-Type': undefined, 'Authorization':'' }
+          }).then(function(response){
+            $rootScope.awsResponse = response;
+            return response;
+          });
+        });
+      } else {
+        $http.post(AmazonBucket, buildFormData(imageFile), {
+          transformRequest: angular.identity,
+          headers: { 'Content-Type': undefined, 'Authorization':'' }
+        }).then(function(response){
+          $rootScope.awsResponse = response;
+          return response;
+        });
+      }
+    });
+  };
 
 //the directive below binds file object to a variable in $scope
-angular.module('uploadModule').directive('fileModel', ['$parse', function ($parse) {
-    return {
-        restrict: 'A',
-        link: function(scope, element, attrs) {
-            var model = $parse(attrs.fileModel);
-            var modelSetter = model.assign;
+// angular.module('uploadModule').directive('fileModel', ['$parse', function ($parse) {
+//     return {
+//         restrict: 'A',
+//         link: function(scope, element, attrs) {
+//             var model = $parse(attrs.fileModel);
+//             var modelSetter = model.assign;
 
-            element.bind('change', function(){
-                scope.$apply(function(){
-                    modelSetter(scope, element[0].files[0]);
-                });
-            });
-        }
-    };
-}]);
+//             element.bind('change', function(){
+//                 scope.$apply(function(){
+//                     modelSetter(scope, element[0].files[0]);
+//                 });
+//             });
+//         }
+//     };
+// }]);
 
     // <form ng-submit="uploadFile()">
     //   <div class="row">
